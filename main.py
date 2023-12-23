@@ -3,6 +3,7 @@ import uvicorn
 from FastAPI.Utils.load_json import *
 from FastAPI.API.collector import *
 from FastAPI.API.predictor import *
+from FastAPI.Class.PAA import *
 from LMDB.controller.lmdb_controller import LMDBManager
 
 app = FastAPI()
@@ -18,8 +19,12 @@ def read_root():
     return {"Hello": "World"}
 
 @app.get("/predict")
-def predict():
+def predict(data: PAAInputData):
     arg = load_json("./FastAPI/hypter/predict.json")
+
+    pressure_datas = data.PressureMap
+    ID = data.ID
+
     if arg["status"] == True:
         predictor(arg)
     else:
