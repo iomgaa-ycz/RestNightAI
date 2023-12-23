@@ -1,0 +1,2 @@
+def predictor(arg):
+    pass
