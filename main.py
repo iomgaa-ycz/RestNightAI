@@ -21,16 +21,29 @@ def read_root():
 
 @app.get("/predict")
 def predict(data: PAAInputData):
+    """
+    预测函数，根据输入的数据进行预测。
+
+    Args:
+        data (PAAInputData): 输入的数据对象，包含压力图和ID。
+
+    Returns:
+        dict: 预测结果，示例为{"Hello": "World"}。
+    """
     begin_time = time.time()
 
+    # 读取预测参数
     arg = load_json("./FastAPI/hypter/predict.json")
 
+    # 读取输入数据
     pressure_datas = data.PressureMap
     ID = data.ID
 
+    # 预处理
     pressure_datas = base64_to_image_list(pressure_datas,ID)
     pressure_datas = preprocess(pressure_datas)
 
+    # 如果为True则为预测，否则为采集
     if arg["status"] == True:
         predictor(arg, pressure_datas, ID, write_queue)
     else:
