@@ -3,8 +3,14 @@ import uvicorn
 from FastAPI.Utils.load_json import *
 from FastAPI.API.collector import *
 from FastAPI.API.predictor import *
+from LMDB.controller.lmdb_controller import LMDBManager
 
 app = FastAPI()
+
+# 加载lmdb数据库
+arg = load_json("./FastAPI/hypter/lmdb.json")
+db_manager = LMDBManager(arg["lmdb_path"])
+write_queue = db_manager.create()
 
 
 @app.get("/test")
