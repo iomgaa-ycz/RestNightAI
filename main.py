@@ -4,6 +4,7 @@ from FastAPI.Utils.load_json import *
 from FastAPI.API.collector import *
 from FastAPI.API.predictor import *
 from FastAPI.Class.PAA import *
+from FastAPI.Utils.preprocess_pressure_img import *
 from LMDB.controller.lmdb_controller import LMDBManager
 
 app = FastAPI()
@@ -20,16 +21,24 @@ def read_root():
 
 @app.get("/predict")
 def predict(data: PAAInputData):
+    begin_time = time.time()
+
     arg = load_json("./FastAPI/hypter/predict.json")
 
     pressure_datas = data.PressureMap
     ID = data.ID
 
-    if arg["status"] == True:
-        predictor(arg)
-    else:
-        collector(arg)
+    pressure_datas = base64_to_image_list(pressure_datas,ID)
 
+    if arg["status"] == True:
+        predictor(arg, pressure_datas, ID, write_queue)
+    else:
+        collector(arg, pressure_datas, ID, write_queue)
+
+    end_time = time.time()
+    predict_time = end_time - begin_time
+    print("Predict time: ", predict_time, "seconds")
+    
     return {"Hello": "World"}
 
 def main():
