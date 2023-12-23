@@ -11,14 +11,17 @@ import { ref } from 'vue';
 
 <style scoped>
 .background {
-    height: 100%;
+    background-color: #f5f5f5;
+    width: 100%;
+    height: 15vh;
+    border-radius: 20px; /* 添加border-radius属性 */
     display: flex;
     justify-content: center;
     align-items: center;
 }
 .word {
-    font-size: 30px;
+    font-size: 50px;
     font-weight: bold;
-    color: #fffdfd;
+    color: #000000;
 }
 </style>
