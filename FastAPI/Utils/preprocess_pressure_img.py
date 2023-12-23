@@ -59,7 +59,6 @@ def process_image(img_path, target_size=(160, 320)):
     
     return mapped_array.tolist()
 
-
 def map_rgb_to_values(img_array):
     """
     Map the RGB values in an image array to their corresponding values using a provided mapping.
@@ -127,3 +126,7 @@ def base64_to_image_list(base64_list,folder,save_pic=False):
             image_as_list = image_array.tolist()
             image_list.append(process_image(image_as_list))
     return image_list
+
+def preprocess(data):
+    data = np.array(data) / 255.0
+    

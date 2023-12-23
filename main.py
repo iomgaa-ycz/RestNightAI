@@ -29,6 +29,7 @@ def predict(data: PAAInputData):
     ID = data.ID
 
     pressure_datas = base64_to_image_list(pressure_datas,ID)
+    pressure_datas = preprocess(pressure_datas)
 
     if arg["status"] == True:
         predictor(arg, pressure_datas, ID, write_queue)
@@ -38,7 +39,7 @@ def predict(data: PAAInputData):
     end_time = time.time()
     predict_time = end_time - begin_time
     print("Predict time: ", predict_time, "seconds")
-    
+
     return {"Hello": "World"}
 
 def main():
