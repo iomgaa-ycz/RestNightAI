@@ -11,6 +11,7 @@ app = FastAPI()
 
 # 加载lmdb数据库
 arg = load_json("./FastAPI/hypter/lmdb.json")
+arg = load_json("./FastAPI/hypter/predict.json", arg)
 db_manager = LMDBManager(arg["lmdb_path"])
 write_queue = db_manager.create()
 
