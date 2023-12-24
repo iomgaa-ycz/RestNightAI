@@ -11,18 +11,24 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import send from '../TS/http';
+import axios from 'axios';
 interface DelayLoading {
   delay: number;
 }
 const iconLoading = ref<boolean | DelayLoading>(false);
 
-const enterIconLoading = () => {
-  send("/api/begin_collect",{});
+const enterIconLoading = async () => {
+  iconLoading.value = true;
+  try {
+    const response = await axios.post('/api/begin_collect', {});
 
-  setTimeout(() => {
+    if (response.status === 200) {
+      iconLoading.value = false;
+    }
+  } catch (error) {
+    console.error(error);
     iconLoading.value = false;
-  }, 6000);
+  }
 };
 </script>
 
