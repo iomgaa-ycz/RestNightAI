@@ -11,13 +11,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import send from '../TS/http';
 interface DelayLoading {
   delay: number;
 }
 const iconLoading = ref<boolean | DelayLoading>(false);
 
 const enterIconLoading = () => {
-  iconLoading.value = { delay: 1000 };
+  send("/api/begin_collect",{});
 
   setTimeout(() => {
     iconLoading.value = false;
