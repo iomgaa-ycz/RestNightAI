@@ -4,6 +4,7 @@
             <div style="height: 20%; width: 100%;"></div>
             <Shower />
             <ProgressBar />
+            <ConsoleBar />
         </a-flex>
     </div>
 </template>
@@ -12,6 +13,7 @@
 import { ref } from 'vue';
 import Shower from '@/components/Shower.vue';
 import ProgressBar from '@/components/ProgressBar.vue';
+import ConsoleBar from '@/components/ConsoleBar.vue';
 
 
 </script>

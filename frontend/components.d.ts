@@ -25,6 +25,7 @@ declare module 'vue' {
     ATable: typeof import('ant-design-vue/es')['Table']
     ATag: typeof import('ant-design-vue/es')['Tag']
     CollectList: typeof import('./src/components/CollectList.vue')['default']
+    ConsoleBar: typeof import('./src/components/ConsoleBar.vue')['default']
     ProgressBar: typeof import('./src/components/ProgressBar.vue')['default']
     Shower: typeof import('./src/components/Shower.vue')['default']
   }

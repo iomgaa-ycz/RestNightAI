@@ -23,7 +23,7 @@
 import { ref } from 'vue';
 const current = ref<number>(1);
 const percent = ref<number>(60);
-const description = 'This is a description.';
+const description = '';
 </script>
   
   
