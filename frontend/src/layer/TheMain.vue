@@ -3,7 +3,7 @@
         <a-flex gap="middle" align="start" vertical :style="{ width: '100%' }">
             <div style="height: 20%; width: 100%;"></div>
             <Shower />
-            <ProgressBar />
+            <ProgressBar :level="level" />
             <ConsoleBar />
         </a-flex>
     </div>
@@ -15,6 +15,7 @@ import Shower from '@/components/Shower.vue';
 import ProgressBar from '@/components/ProgressBar.vue';
 import ConsoleBar from '@/components/ConsoleBar.vue';
 
+const level = ref(0);
 
 </script>
 

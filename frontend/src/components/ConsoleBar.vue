@@ -4,7 +4,7 @@
             <template #icon><PoweroffOutlined /></template>
                 开始采集
         </a-button>
-        <a-button type="primary">下一步</a-button>
+        <a-button type="primary" @click="enternext">下一步</a-button>
         <a-button type="primary">重置</a-button>
     </a-flex>
 </template>
@@ -18,17 +18,22 @@ interface DelayLoading {
 const iconLoading = ref<boolean | DelayLoading>(false);
 
 const enterIconLoading = async () => {
-  iconLoading.value = true;
+  if (iconLoading.value) {
+    return;
+  }
   try {
     const response = await axios.post('/api/begin_collect', {});
 
     if (response.status === 200) {
-      iconLoading.value = false;
+      iconLoading.value = true;
     }
   } catch (error) {
     console.error(error);
-    iconLoading.value = false;
   }
+};
+
+const enternext = () => {
+  iconLoading.value = false;
 };
 </script>
 
