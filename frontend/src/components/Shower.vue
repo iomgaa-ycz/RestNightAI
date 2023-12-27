@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, watchEffect } from 'vue';
 import type { CSSProperties } from 'vue';
 import type { FlexProps } from 'ant-design-vue';
 
@@ -23,18 +23,13 @@ const props = defineProps({
   },
 });
 
-const justifyOptions = reactive<FlexProps['justify'][]>([
-        'flex-start',
-        'center',
-        'flex-end',
-        'space-between',
-        'space-around',
-        'space-evenly',
-]);
+watchEffect(() => {
+  if (props.action === "正卧（一级）") {
+    epoch.value = epoch.value + 1;
+  }
+});
 
-const alignOptions = reactive<FlexProps['align'][]>(['flex-start', 'center', 'flex-end']);
-const justify = ref(justifyOptions[0]);
-const alignItems = ref(alignOptions[0]);
+
 const boxStyle: CSSProperties = {
         width: '100%',
         height: '200px',
