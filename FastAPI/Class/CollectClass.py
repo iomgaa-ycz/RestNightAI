@@ -2,7 +2,7 @@ from typing import List
 from pydantic import BaseModel
 
 class CCInputData(BaseModel):
-    Timne: str
+    Time: str
     ID: str
 
 

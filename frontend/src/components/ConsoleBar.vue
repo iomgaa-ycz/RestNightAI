@@ -20,7 +20,7 @@ interface DelayLoading {
 
 const iconLoading = ref<boolean | DelayLoading>(false);
 const level = ref<number>(0);
-const uuid = ref<string>(''); // Reactive variable to store the UUID
+const id = ref<string>(''); // Reactive variable to store the UUID
 
 // Define the props and emits
 const props = defineProps();
@@ -30,10 +30,12 @@ const enterIconLoading = async () => {
   if (iconLoading.value) {
     return;
   }
+  id.value = uuidv4();
   try {
+    const time = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }); // Convert to Beijing time
     const response = await axios.post('/api/begin_collect', {
-      time: new Date().toISOString(),
-      uuid: uuid.value // Send the UUID to the server
+      Time: time,
+      ID: id.value // Send the UUID to the server
     });
 
     if (response.status === 200) {
@@ -77,5 +79,5 @@ const enterreset = () => {
 
 // Export the level and uuid variables
 const { level: exposedLevel } = toRefs({ level });
-const { uuid: exposedUuid } = toRefs({ uuid });
+const { uuid: exposedUuid } = toRefs({ uuid: id });
 </script>
