@@ -4,7 +4,7 @@
             <div style="height: 20%; width: 100%;"></div>
             <Shower />
             <ProgressBar :level="level" />
-            <ConsoleBar />
+            <ConsoleBar @updateLevel="handleUpdateLevel" />
         </a-flex>
     </div>
 </template>
@@ -16,6 +16,10 @@ import ProgressBar from '@/components/ProgressBar.vue';
 import ConsoleBar from '@/components/ConsoleBar.vue';
 
 const level = ref(0);
+
+const handleUpdateLevel = (newLevel: number) => {
+    level.value = newLevel;
+};
 
 </script>
 
