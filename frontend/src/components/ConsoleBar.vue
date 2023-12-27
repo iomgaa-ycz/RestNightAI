@@ -55,20 +55,21 @@ const enternext = async () => {
   iconLoading.value = false;
   if (level.value == 1) {
     level.value = 2; // Increment level by 2
+    try {
+      const time = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }); // Convert to Beijing time
+      const response = await axios.post('/api/finish_collect', {
+        Time: time,
+        ID: id.value // Send the UUID to the server
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    } 
   } else {
     level.value = 0; // Increment level by 0
   }
   emit('updateLevel', level.value); // Emit the updateLevel event
 
-  try {
-    const response = await axios.post('/api/next', {
-      time: new Date().toISOString(),
-      uuid: uuidv4()
-    });
-    console.log(response.data);
-  } catch (error) {
-    console.error(error);
-  }
 };
 
 const enterreset = () => {

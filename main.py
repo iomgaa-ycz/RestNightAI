@@ -7,6 +7,7 @@ from FastAPI.Class.PAA import *
 from FastAPI.Class.CollectClass import *
 from FastAPI.Utils.preprocess_pressure_img import *
 from LMDB.controller.lmdb_controller import LMDBManager
+from datetime import datetime,timedelta
 
 app = FastAPI()
 
@@ -15,6 +16,9 @@ arg = load_json("./FastAPI/hypter/lmdb.json")
 arg = load_json("./FastAPI/hypter/predict.json", arg)
 db_manager = LMDBManager(arg["lmdb_path"])
 write_queue = db_manager.create()
+
+# 保存标注
+collect_label = {}
 
 
 @app.get("/test")
@@ -59,8 +63,20 @@ def predict(data: PAAInputData):
 
 @app.post("/begin_collect")
 def begin_collect(data: CCInputData):
-    time = data.Time
+    time = datetime.strptime(data.Time, "%Y/%m/%d %H:%M:%S")
+    time = time + timedelta(seconds=1)
+    
     ID = data.ID
+    collect_label[ID] = CCRecordData(ID=ID, begin_time=time, end_time=None)
+    return {"Hello": "World"}
+
+@app.post("/finish_collect")
+def finish_collect(data: CCInputData):
+    time = datetime.strptime(data.Time, "%Y/%m/%d %H:%M:%S")
+    time = time - timedelta(seconds=1)
+
+    ID = data.ID
+    collect_label[ID].end_time = time
     return {"Hello": "World"}
 
 def main():
