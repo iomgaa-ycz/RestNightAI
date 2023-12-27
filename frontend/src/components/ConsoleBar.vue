@@ -11,6 +11,7 @@
 
 <script setup lang="ts">
 import { ref, toRefs, defineProps, defineEmits } from 'vue';
+import { watchEffect } from 'vue';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,10 +22,11 @@ interface DelayLoading {
 const iconLoading = ref<boolean | DelayLoading>(false);
 const level = ref<number>(0);
 const id = ref<string>(''); // Reactive variable to store the UUID
+const action = ref<string>(''); // Reactive variable to store the action
 
 // Define the props and emits
 const props = defineProps();
-const emit = defineEmits(['updateLevel']);
+const emit = defineEmits(['updateLevel', 'updateAction']);
 
 const enterIconLoading = async () => {
   if (iconLoading.value) {
@@ -35,6 +37,7 @@ const enterIconLoading = async () => {
     const time = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }); // Convert to Beijing time
     const response = await axios.post('/api/begin_collect', {
       Time: time,
+      Action: action.value,
       ID: id.value // Send the UUID to the server
     });
 
@@ -59,6 +62,7 @@ const enternext = async () => {
       const time = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }); // Convert to Beijing time
       const response = await axios.post('/api/finish_collect', {
         Time: time,
+        Action: action.value,
         ID: id.value // Send the UUID to the server
       });
       console.log(response.data);
@@ -77,6 +81,19 @@ const enterreset = () => {
   level.value = 0; // Increment level by 0
   emit('updateLevel', level.value); // Emit the updateLevel event
 };
+
+// Update current and percent based on level prop
+watchEffect(async () => {
+  if (level.value === 0) {
+    try {
+      const response = await axios.get('/api/collect_action');
+      action.value = response.data.action;
+      emit('updateAction', action.value); // Emit the updateAction event
+    } catch (error) {
+      console.error(error);
+    }
+  } 
+});
 
 // Export the level and uuid variables
 const { level: exposedLevel } = toRefs({ level });

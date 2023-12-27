@@ -19,6 +19,8 @@ write_queue = db_manager.create()
 
 # 保存标注
 collect_label = {}
+action_list = ["正卧", "俯卧", "左侧卧", "右侧卧", "坐床头", "坐床边", "坐中间", "手掌", "站立"]
+index = 0
 
 
 @app.get("/test")
@@ -67,7 +69,8 @@ def begin_collect(data: CCInputData):
     time = time + timedelta(seconds=1)
     
     ID = data.ID
-    collect_label[ID] = CCRecordData(ID=ID, begin_time=time, end_time=None)
+    action = data.Action
+    collect_label[ID] = CCRecordData(ID=ID, action=action, begin_time=time, end_time=None)
     return {"Hello": "World"}
 
 @app.post("/finish_collect")
@@ -76,8 +79,22 @@ def finish_collect(data: CCInputData):
     time = time - timedelta(seconds=1)
 
     ID = data.ID
+    action = data.Action
     collect_label[ID].end_time = time
     return {"Hello": "World"}
+
+@app.get("/collect_action")
+def collect_action():
+    global index
+    if index >= len(action_list):
+        index = 0
+        action = action_list[index]
+        index += 1
+        return {"action": action_list[index]}
+    else:
+        action = action_list[index]
+        index += 1
+        return {"action": action}
 
 def main():
     uvicorn.run(app, host="0.0.0.0", port=8000)

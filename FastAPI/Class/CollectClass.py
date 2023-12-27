@@ -5,6 +5,7 @@ from typing import Optional
 
 class CCInputData(BaseModel):
     Time: str
+    Action: str
     ID: str
 
 
@@ -16,5 +17,6 @@ class CCResponseData(BaseModel):
 
 class CCRecordData(BaseModel):
     ID: str
+    action: str
     begin_time: datetime.datetime
     end_time: Optional[datetime.datetime]
