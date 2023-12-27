@@ -13,11 +13,13 @@
   "dependencies": {
     "ant-design-vue": "^4.0.8",
     "axios": "^1.6.2",
+    "uuid": "^9.0.1",
     "vue": "^3.3.11"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
     "@types/node": "^18.19.3",
+    "@types/uuid": "^9.0.7",
     "@vitejs/plugin-vue": "^4.5.2",
     "@vue/tsconfig": "^0.5.0",
     "npm-run-all2": "^6.1.1",

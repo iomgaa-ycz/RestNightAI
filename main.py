@@ -4,6 +4,7 @@ from FastAPI.Utils.load_json import *
 from FastAPI.API.collector import *
 from FastAPI.API.predictor import *
 from FastAPI.Class.PAA import *
+from FastAPI.Class.CollectClass import *
 from FastAPI.Utils.preprocess_pressure_img import *
 from LMDB.controller.lmdb_controller import LMDBManager
 
@@ -57,7 +58,9 @@ def predict(data: PAAInputData):
     return {"Hello": "World"}
 
 @app.post("/begin_collect")
-def begin_collect():
+def begin_collect(data: CCInputData):
+    time = data.Time
+    ID = data.ID
     return {"Hello": "World"}
 
 def main():

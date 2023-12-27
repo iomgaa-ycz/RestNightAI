@@ -12,6 +12,7 @@
 <script setup lang="ts">
 import { ref, toRefs, defineProps, defineEmits } from 'vue';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 interface DelayLoading {
   delay: number;
@@ -19,6 +20,7 @@ interface DelayLoading {
 
 const iconLoading = ref<boolean | DelayLoading>(false);
 const level = ref<number>(0);
+const uuid = ref<string>(''); // Reactive variable to store the UUID
 
 // Define the props and emits
 const props = defineProps();
@@ -29,7 +31,10 @@ const enterIconLoading = async () => {
     return;
   }
   try {
-    const response = await axios.post('/api/begin_collect', {});
+    const response = await axios.post('/api/begin_collect', {
+      time: new Date().toISOString(),
+      uuid: uuid.value // Send the UUID to the server
+    });
 
     if (response.status === 200) {
       iconLoading.value = true;
@@ -44,7 +49,7 @@ const enterIconLoading = async () => {
   }
 };
 
-const enternext = () => {
+const enternext = async () => {
   iconLoading.value = false;
   if (level.value == 1) {
     level.value = 2; // Increment level by 2
@@ -52,6 +57,16 @@ const enternext = () => {
     level.value = 0; // Increment level by 0
   }
   emit('updateLevel', level.value); // Emit the updateLevel event
+
+  try {
+    const response = await axios.post('/api/next', {
+      time: new Date().toISOString(),
+      uuid: uuidv4()
+    });
+    console.log(response.data);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const enterreset = () => {
@@ -60,6 +75,7 @@ const enterreset = () => {
   emit('updateLevel', level.value); // Emit the updateLevel event
 };
 
-// Export the level variable
+// Export the level and uuid variables
 const { level: exposedLevel } = toRefs({ level });
+const { uuid: exposedUuid } = toRefs({ uuid });
 </script>
