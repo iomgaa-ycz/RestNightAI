@@ -30,7 +30,7 @@ const props = defineProps();
 const emit = defineEmits(['updateLevel', 'updateAction', 'updateCountdown']);
 
 const enterIconLoading = async () => {
-  if (iconLoading.value || Countdown.value != 120) {
+  if (iconLoading.value || Countdown.value != 120 || level.value != 0) {
     return;
   }
   Countdown.value = Countdown.value - 1;
@@ -46,11 +46,10 @@ const enterIconLoading = async () => {
 
     if (response.status === 200) {
       iconLoading.value = true;
-      if (level.value == 0) {
-        level.value = 1; // Increment level by 1
-        console.log('level updated to: ', level.value);
-        emit('updateLevel', level.value); // Emit the updateLevel event
-      }
+      level.value = 1; // Increment level by 1
+      console.log('level updated to: ', level.value);
+      emit('updateLevel', level.value); // Emit the updateLevel event
+
     }
   } catch (error) {
     console.error(error);
