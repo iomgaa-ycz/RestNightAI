@@ -2,9 +2,9 @@
     <div class="background">
         <a-flex gap="middle" align="start" vertical :style="{ width: '100%' }">
             <div style="height: 20%; width: 100%;"></div>
-            <Shower :action="action" />
+            <Shower :action="action" :Countdown="Countdown" />
             <ProgressBar :level="level"/>
-            <ConsoleBar @updateLevel="handleUpdateLevel" @updateAction="handleUpdateAction" />
+            <ConsoleBar @updateLevel="handleUpdateLevel" @updateAction="handleUpdateAction" @updateCountdown="handleUpdateCountDown" />
         </a-flex>
     </div>
 </template>
@@ -17,6 +17,7 @@ import ConsoleBar from '@/components/ConsoleBar.vue';
 
 const level = ref(0);
 const action = ref('');
+const Countdown = ref(120);
 
 const handleUpdateLevel = (newLevel: number) => {
     level.value = newLevel;
@@ -24,6 +25,10 @@ const handleUpdateLevel = (newLevel: number) => {
 
 const handleUpdateAction = (newAction: string) => {
     action.value = newAction;
+};
+
+const handleUpdateCountDown = (newCountDown: number) => {
+    Countdown.value = newCountDown;
 };
 
 </script>

@@ -21,17 +21,20 @@ interface DelayLoading {
 
 const iconLoading = ref<boolean | DelayLoading>(false);
 const level = ref<number>(0);
+const Countdown = ref<number>(120);
 const id = ref<string>(''); // Reactive variable to store the UUID
 const action = ref<string>(''); // Reactive variable to store the action
 
 // Define the props and emits
 const props = defineProps();
-const emit = defineEmits(['updateLevel', 'updateAction']);
+const emit = defineEmits(['updateLevel', 'updateAction', 'updateCountdown']);
 
 const enterIconLoading = async () => {
-  if (iconLoading.value) {
+  if (iconLoading.value || Countdown.value != 120) {
     return;
   }
+  Countdown.value = Countdown.value - 1;
+  emit('updateCountdown', Countdown.value); // Emit the updateCountdown event
   id.value = uuidv4();
   try {
     const time = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }); // Convert to Beijing time
@@ -94,6 +97,18 @@ watchEffect(async () => {
     }
   } 
 });
+
+// Timer to decrement Countdown value every second until it reaches 0
+const timer = setInterval(() => {
+  if (Countdown.value !== 120) {
+    Countdown.value -= 1;
+    emit('updateCountdown', Countdown.value); // Emit the updateCountdown event
+    if (Countdown.value === 0) {
+      Countdown.value = 120;
+      emit('updateCountdown', Countdown.value); // Emit the updateCountdown event
+    }
+  }
+}, 1000);
 
 // Export the level and uuid variables
 const { level: exposedLevel } = toRefs({ level });
