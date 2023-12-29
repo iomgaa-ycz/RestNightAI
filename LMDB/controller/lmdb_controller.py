@@ -73,7 +73,7 @@ class LMDBManager(multiprocessing.Process):
             if not self.write_queue.empty():
                 key, value_json = self.write_queue.get()
                 with self.env.begin(db=self.second_db, write=True) as txn:
-                    txn.put(key.encode('utf-8'), value_json)
+                    txn.put(key.encode('utf-8'), value_json.encode('utf-8'))
                     self.second_list.append(key)
                     self.process_record_dict()
 
