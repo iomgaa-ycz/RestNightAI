@@ -8,34 +8,44 @@ import base64
 from PIL import Image
 from io import BytesIO
 import numpy as np
+import cv2
 
-def enhanced_cropping(img_array):
+
+def extract_and_concat_blocks_corrected(image_np):
     """
-    Enhanced cropping method following the new requirements.
+    Extracts 240x240 blocks from specified positions in the image, considering a 2 pixel gap between each block,
+    and concatenates them into a single numpy array.
+
+    Parameters:
+    - image_np: a numpy array of the image
+
+    Returns:
+    - concatenated_blocks: a numpy array containing the concatenated blocks
     """
-    # Load the image
-    # img = Image.open(img_path)
-    # img_array = np.array(img)
-
-    # Initial removal of fully transparent rows and columns
-    img_array = np.array(img_array)
-    rows_fully_transparent = np.all(img_array[:, :, 3] == 0, axis=1)
-    cols_fully_transparent = np.all(img_array[:, :, 3] == 0, axis=0)
+    # Define the corrected coordinates for the blocks (left, upper, right, lower), considering the 2 pixel gap
+    corrected_block_coords = [
+        (0, 0, 240, 240),            # Block 1
+        (242, 0, 242 + 240, 240),    # Block 2
+        (484, 0, 484 + 240, 240),    # Block 3
+        (726, 0, 726 + 240, 240),    # Block 4
+        (0, 242, 240, 242 + 240),    # Block 5
+        (242, 242, 242 + 240, 242 + 240),  # Block 6
+        (484, 242, 484 + 240, 242 + 240),  # Block 7
+        (726, 242, 726 + 240, 242 + 240)   # Block 8
+    ]
     
-    # Remove rows and columns where the proportion of fully transparent pixels is above 80%
-    rows_high_transparency = np.sum(img_array[:, :, 3] == 0, axis=1) / img_array.shape[1] > 0.8
-    cols_high_transparency = np.sum(img_array[:, :, 3] == 0, axis=0) / img_array.shape[0] > 0.8
-
-    # Combine the conditions
-    rows_to_remove = np.logical_or(rows_fully_transparent, rows_high_transparency)
-    cols_to_remove = np.logical_or(cols_fully_transparent, cols_high_transparency)
-
-    # Crop the image
-    cropped_array = img_array[~rows_to_remove][:, ~cols_to_remove]
+    # Extract blocks
+    blocks = [image_np[y1:y2, x1:x2] for (x1, y1, x2, y2) in corrected_block_coords]
     
-    return cropped_array
+    # Concatenate blocks horizontally and then vertically
+    top_row_blocks = np.hstack(blocks[:4])
+    bottom_row_blocks = np.hstack(blocks[4:])
+    concatenated_blocks = np.vstack((top_row_blocks, bottom_row_blocks))
+    
+    return concatenated_blocks
 
-def process_image(img_path, target_size=(160, 320)):
+
+def process_image(img_path, initial_rows_to_remove, initial_cols_to_remove, target_size=(160, 320)):
     """
     Process the image by cropping, downsampling, and mapping RGB values.
     
@@ -48,18 +58,30 @@ def process_image(img_path, target_size=(160, 320)):
     - numpy.ndarray: The processed image array.
     """
 
+    start_time = time.time()
+
     # Enhanced cropping
-    cropped_array = enhanced_cropping(img_path)
+    # cropped_array = updated_enhanced_cropping_with_initials(img_path, initial_rows_to_remove, initial_cols_to_remove)
+    cropped_array = extract_and_concat_blocks_corrected(img_path)
+    
+    end_time = time.time()
+    print("Enhanced cropping time:", end_time - start_time)
+    
+    start_time = time.time()
     
     # Downsampling
     downsampled_array = downsample_image_custom(cropped_array, target_size)
     
     end_time = time.time()
     print("Downsampling time:", end_time - start_time)
+    
     start_time = time.time()
-
+    
     # Mapping RGB values
     mapped_array = map_rgb_to_values(downsampled_array)
+    
+    end_time = time.time()
+    print("Mapping RGB values time:", end_time - start_time)
     
     return mapped_array.tolist()
 
@@ -94,7 +116,7 @@ def downsample_image_custom(img_array, target_size=(160, 320)):
     
     return downsampled_array
 
-def base64_to_image_list(base64_list,folder,save_pic=False):
+def base64_to_image_list(base64_list,folder,initial_rows,initial_cols,save_pic=False):
     if save_pic:
         if not os.path.exists('./pic'):
             os.makedirs('./pic')  # 创建文件夹，如果不存在
@@ -118,17 +140,25 @@ def base64_to_image_list(base64_list,folder,save_pic=False):
             image_as_list = image_array.tolist()
             image_list.append(process_image(image_as_list))
     else:
+        begin_time = time.time()
         image_list = []
 
         for i, base64_str in enumerate(base64_list):
             # 将Base64字符串转换为图像
             image_data = base64.b64decode(base64_str)
-            image = Image.open(BytesIO(image_data))
+            # image = Image.open(BytesIO(image_data))
 
             # 将图像转换为三维数组
-            image_array = np.array(image)
-            image_as_list = image_array.tolist()
-            image_list.append(process_image(image_as_list))
+            # image_array = np.array(image)
+            # 直接使用OpenCV从二进制数据读取图像
+            image_array = cv2.imdecode(np.frombuffer(image_data, np.uint8), cv2.IMREAD_COLOR)
+
+            # 如果需要，将BGR格式转换为RGB格式
+            image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)
+            # image_as_list = image_array.tolist()
+            image_list.append(process_image(image_array,initial_rows,initial_cols))
+        process_time = time.time() - begin_time
+        print("Process time: ", process_time, "seconds")
     return image_list
 
 def preprocess(data):

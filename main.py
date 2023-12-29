@@ -17,6 +17,11 @@ arg = load_json("./FastAPI/hypter/predict.json", arg)
 db_manager = LMDBManager(arg["lmdb_path"])
 write_queue = db_manager.create()
 
+#加载initial cols与rows
+initial_rows = np.loadtxt('./FastAPI/data/initial_rows_to_remove.txt', dtype=bool)
+initial_cols = np.loadtxt('./FastAPI/data/initial_cols_to_remove.txt', dtype=bool)
+
+
 # 保存标注
 collect_label = {}
 action_list = ["正卧（一级）", "正卧（二级）", "俯卧（一级）", "俯卧（二级）", "左侧卧（一级）", "左侧卧（二级）", "右侧卧（一级）", "右侧卧（二级）","坐床头", "坐床边", "坐中间", "手掌", "站立", "三级体动"]
@@ -27,7 +32,7 @@ index = 0
 def read_root():
     return {"Hello": "World"}
 
-@app.get("/predict")
+@app.post("/predict")
 def predict(data: PAAInputData):
     """
     预测函数，根据输入的数据进行预测。
@@ -48,7 +53,8 @@ def predict(data: PAAInputData):
     ID = data.ID
 
     # 预处理
-    pressure_datas = base64_to_image_list(pressure_datas,ID)
+    global initial_rows,initial_cols
+    pressure_datas = base64_to_image_list(pressure_datas,ID,initial_rows,initial_cols)
     pressure_datas = preprocess(pressure_datas)
 
     # 如果为True则为预测，否则为采集
@@ -57,8 +63,7 @@ def predict(data: PAAInputData):
     else:
         collector(arg, pressure_datas, ID, write_queue)
 
-    end_time = time.time()
-    predict_time = end_time - begin_time
+    predict_time = time.time() - begin_time
     print("Predict time: ", predict_time, "seconds")
 
     return {"Hello": "World"}
