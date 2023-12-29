@@ -58,30 +58,17 @@ def process_image(img_path, initial_rows_to_remove, initial_cols_to_remove, targ
     - numpy.ndarray: The processed image array.
     """
 
-    start_time = time.time()
 
     # Enhanced cropping
     # cropped_array = updated_enhanced_cropping_with_initials(img_path, initial_rows_to_remove, initial_cols_to_remove)
     cropped_array = extract_and_concat_blocks_corrected(img_path)
     
-    end_time = time.time()
-    print("Enhanced cropping time:", end_time - start_time)
-    
-    start_time = time.time()
     
     # Downsampling
     downsampled_array = downsample_image_custom(cropped_array, target_size)
     
-    end_time = time.time()
-    print("Downsampling time:", end_time - start_time)
-    
-    start_time = time.time()
-    
     # Mapping RGB values
     mapped_array = map_rgb_to_values(downsampled_array)
-    
-    end_time = time.time()
-    print("Mapping RGB values time:", end_time - start_time)
     
     return mapped_array.tolist()
 
@@ -141,7 +128,7 @@ def base64_to_image_list(base64_list,folder,initial_rows,initial_cols,save_pic=F
             image_list.append(process_image(image_as_list))
     else:
         begin_time = time.time()
-        image_list = []
+        pressure_array = np.empty((len(base64_list), 160, 320))
 
         for i, base64_str in enumerate(base64_list):
             # 将Base64字符串转换为图像
@@ -154,13 +141,14 @@ def base64_to_image_list(base64_list,folder,initial_rows,initial_cols,save_pic=F
             image_array = cv2.imdecode(np.frombuffer(image_data, np.uint8), cv2.IMREAD_COLOR)
 
             # 如果需要，将BGR格式转换为RGB格式
-            image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)
+            temp_image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)
             # image_as_list = image_array.tolist()
-            image_list.append(process_image(image_array,initial_rows,initial_cols))
+            pressure_array[i,:,:] = process_image(temp_image_array, initial_rows, initial_cols)
         process_time = time.time() - begin_time
         print("Process time: ", process_time, "seconds")
-    return image_list
+    return pressure_array
 
 def preprocess(data):
     data = np.array(data) / 255.0
+    return data
     

@@ -6,6 +6,8 @@ import time
 import json
 import threading
 import pickle
+import datetime
+
 
 # 创建 LMDBManager 类，继承 multiprocessing.Process 
 class LMDBManager(multiprocessing.Process):
@@ -70,7 +72,7 @@ class LMDBManager(multiprocessing.Process):
             if not self.write_queue.empty():
                 key, value_json = self.write_queue.get()
                 with self.env.begin(db=self.second_db, write=True) as txn:
-                    txn.put(key.encode('utf-8'), value_json.encode('utf-8'))
+                    txn.put(key.encode('utf-8'), value_json)
                     self.second_list.append(key)
                     self.process_record_dict()
 
@@ -111,8 +113,8 @@ class LMDBManager(multiprocessing.Process):
     def process_record_dict(self):
         if len(self.second_list) >= 5:
             last_five_seconds = self.second_list[-5:]
-            first_time = datetime.datetime.strptime(last_five_seconds[0], "%Y-%m-%d %H:%M:%S")
-            last_time = datetime.datetime.strptime(last_five_seconds[-1], "%Y-%m-%d %H:%M:%S")
+            first_time = datetime.datetime.strptime(last_five_seconds[0], "%Y-%m-%dT%H:%M:%S")
+            last_time = datetime.datetime.strptime(last_five_seconds[0], "%Y-%m-%dT%H:%M:%S")
             time_diff = (last_time - first_time).total_seconds()
             if time_diff < 7:
                 self.record_dict[last_five_seconds[0]] = last_five_seconds
