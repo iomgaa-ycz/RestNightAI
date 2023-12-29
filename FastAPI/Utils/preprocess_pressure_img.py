@@ -54,6 +54,10 @@ def process_image(img_path, target_size=(160, 320)):
     # Downsampling
     downsampled_array = downsample_image_custom(cropped_array, target_size)
     
+    end_time = time.time()
+    print("Downsampling time:", end_time - start_time)
+    start_time = time.time()
+
     # Mapping RGB values
     mapped_array = map_rgb_to_values(downsampled_array)
     
