@@ -44,8 +44,9 @@ class LMDBManager(multiprocessing.Process):
         # 用于通知 LMDB 线程停止的事件
         self.flag = multiprocessing.Event() 
 
-        # 创建 list 用于存储数据包 ID
-        self.second_list = self.get_keys() 
+        # 创建共享列表用于存储数据包 ID
+        self.manager = multiprocessing.Manager()
+        self.second_list = self.manager.list(self.get_keys())
 
         # 创建 dict 用于存储每 20 帧的数据包
         self.record_dict = {} 
