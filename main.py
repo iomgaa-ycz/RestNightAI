@@ -17,9 +17,7 @@ arg = load_json("./FastAPI/hypter/predict.json", arg)
 db_manager = LMDBManager(arg["lmdb_path"])
 write_queue = db_manager.create()
 
-#加载initial cols与rows
-initial_rows = np.loadtxt('./FastAPI/data/initial_rows_to_remove.txt', dtype=bool)
-initial_cols = np.loadtxt('./FastAPI/data/initial_cols_to_remove.txt', dtype=bool)
+
 
 
 # 保存标注
@@ -53,8 +51,7 @@ def predict(data: PAAInputData):
     ID = data.ID
 
     # 预处理
-    global initial_rows,initial_cols
-    pressure_datas = base64_to_image_list(pressure_datas,ID,initial_rows,initial_cols)
+    pressure_datas = base64_to_image_list(pressure_datas,ID)
     pressure_datas = preprocess(pressure_datas)
 
     # 如果为True则为预测，否则为采集
@@ -100,6 +97,15 @@ def collect_action():
         action = action_list[index]
         index += 1
         return {"action": action}
+
+@app.get("/get_database_key_number")
+def get_database_key_number():
+    return {"number":db_manager.get_second_list_length()}
+
+@app.get("/clean_database")
+def clean_database():
+    db_manager.clear_databases()
+    return {"Hello": "World"}
 
 def main():
     uvicorn.run(app, host="0.0.0.0", port=8000)

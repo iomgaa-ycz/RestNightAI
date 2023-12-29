@@ -139,5 +139,11 @@ class LMDBManager(multiprocessing.Process):
         self.start_sync_timer()  # 完成同步后重新启动定时器
 
 
-
-    
+    def get_second_list_length(self):
+        return len(self.second_list)
+        
+    # 清空 pressure 和 hyper 两个数据库
+    def clear_databases(self):
+        with self.env.begin(write=True) as txn:
+            txn.drop(self.second_db, delete=False)
+            txn.drop(self.hypter_db, delete=False)

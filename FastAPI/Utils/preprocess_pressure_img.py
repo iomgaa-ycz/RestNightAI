@@ -45,7 +45,7 @@ def extract_and_concat_blocks_corrected(image_np):
     return concatenated_blocks
 
 
-def process_image(img_path, initial_rows_to_remove, initial_cols_to_remove, target_size=(160, 320)):
+def process_image(img_path, target_size=(160, 320)):
     """
     Process the image by cropping, downsampling, and mapping RGB values.
     
@@ -103,7 +103,7 @@ def downsample_image_custom(img_array, target_size=(160, 320)):
     
     return downsampled_array
 
-def base64_to_image_list(base64_list,folder,initial_rows,initial_cols,save_pic=False):
+def base64_to_image_list(base64_list,folder,save_pic=False):
     if save_pic:
         if not os.path.exists('./pic'):
             os.makedirs('./pic')  # 创建文件夹，如果不存在
@@ -143,7 +143,7 @@ def base64_to_image_list(base64_list,folder,initial_rows,initial_cols,save_pic=F
             # 如果需要，将BGR格式转换为RGB格式
             temp_image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)
             # image_as_list = image_array.tolist()
-            pressure_array[i,:,:] = process_image(temp_image_array, initial_rows, initial_cols)
+            pressure_array[i,:,:] = process_image(temp_image_array)
         process_time = time.time() - begin_time
         print("Process time: ", process_time, "seconds")
     return pressure_array
