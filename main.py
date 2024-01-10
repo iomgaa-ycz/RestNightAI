@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
 from FastAPI.Utils.load_json import *
+from FastAPI.Utils.utils import *
 from FastAPI.API.collector import *
 from FastAPI.API.predictor import *
 from FastAPI.Class.PAA import *
@@ -107,6 +108,16 @@ def get_database_key_number():
 def clean_database():
     db_manager.clear_databases()
     return {"Hello": "World"}
+
+@app.get("/train_Onbed")
+def train_Onbed():
+    # 读取预测参数
+    arg = load_json("./FastAPI/hypter/train_Onbed.json")
+    Database_name = arg["Database_name"]
+    missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
+    train_db,val_db = split_list(Database_name, arg["train_val_rate"]) # 划分训练集和验证集
+
+    print(missing_databases)
 
 def main():
     uvicorn.run(app, host="0.0.0.0", port=8000)

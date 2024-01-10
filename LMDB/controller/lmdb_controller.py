@@ -8,7 +8,6 @@ import threading
 import pickle
 import datetime
 
-
 # 创建 LMDBManager 类，继承 multiprocessing.Process 
 class LMDBManager(multiprocessing.Process):
    
@@ -33,7 +32,7 @@ class LMDBManager(multiprocessing.Process):
         self.env = lmdb.open(self.db_path, map_size=self.map_size, max_dbs=self.max_dbs) 
 
         # 创建并打开命名为 'pressure' 的数据库
-        self.second_db = self.env.open_db('pressure'.encode('utf-8')) 
+        self.second_db = self.env.open_db('yuchengzhang'.encode('utf-8')) 
 
         # 创建并打开命名为 'hypter' 的数据库
         self.hypter_db = self.env.open_db('hypter'.encode('utf-8')) 
@@ -92,8 +91,10 @@ class LMDBManager(multiprocessing.Process):
         return None
 
     # 获取数据库中所有键
-    def get_keys(self):
-        with self.env.begin(db=self.second_db, write=False) as txn:
+    def get_keys(self,db=None):
+        if db is None:
+            db = self.second_db
+        with self.env.begin(db=db, write=False) as txn:
             return [key.decode('utf-8') for key, _ in txn.cursor()]
 
     # 停止 LMDB 线程函数
@@ -148,3 +149,15 @@ class LMDBManager(multiprocessing.Process):
         with self.env.begin(write=True) as txn:
             txn.drop(self.second_db, delete=False)
             txn.drop(self.hypter_db, delete=False)
+
+    def check_databases(self, databases):
+        missing_databases = []
+        for db_name in databases:
+            try:
+                db = self.env.open_db(db_name.encode('utf-8')) 
+                num = self.get_keys(db)
+            except lmdb.Error:
+                # 如果无法打开数据库，则添加到缺失数据库列表中
+                missing_databases.append(db_name)
+        return missing_databases
+
