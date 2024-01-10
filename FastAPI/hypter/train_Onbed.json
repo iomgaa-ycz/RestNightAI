@@ -2,6 +2,7 @@
     "lmdb_path": "./LMDB/database",
     "Database_name": ["yuchengzhang","baishuhang"],
     "train_val_rate": 0.8,
+    "device": "mps",
     "encoder": {
         "resnet1_params": {
             "channels": [16,24,40,48],
@@ -37,7 +38,7 @@
         },
         "resnet2_params": {
             "channels": [48,40,24,16],
-            "in_channel": 48,
+            "out_channel": 48,
             "num_blocks": [1,1,1,1],
             "strides": [2,2,2,2,2]
         }

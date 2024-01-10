@@ -9,6 +9,8 @@ from FastAPI.Class.CollectClass import *
 from FastAPI.Utils.preprocess_pressure_img import *
 from LMDB.controller.lmdb_controller import LMDBManager
 from datetime import datetime,timedelta
+from FastAPI.Model.Onbed_model import *
+from FastAPI.Utils.dataloader import *
 
 app = FastAPI()
 
@@ -115,7 +117,15 @@ def train_Onbed():
     arg = load_json("./FastAPI/hypter/train_Onbed.json")
     Database_name = arg["Database_name"]
     missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
+
+    # 生成训练集和验证集
     train_db,val_db = split_list(Database_name, arg["train_val_rate"]) # 划分训练集和验证集
+    train_dataset = PressureDataset(db_manager, None, phase="train",db_name="yuchengzhang")
+
+    # 初始化模型
+    model = Onbed_model(arg)
+    model = model.to(arg["device"])
+
 
     print(missing_databases)
 
