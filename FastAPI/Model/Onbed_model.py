@@ -11,7 +11,7 @@ class Onbed_model(nn.Module):
         encoder_params = hypers['encoder']
         decoder_params = hypers['decoder']
         encoder_resnet_params = encoder_params['resnet1_params']
-        decoder_resnet_params = decoder_params['resnet2_params']
+        decoder_resnet_params = decoder_params['resnet1_params']
 
         self.pose = ResNet(
             channels=encoder_resnet_params['channels'],

@@ -83,8 +83,10 @@ class LMDBManager(multiprocessing.Process):
             self.process_record_dict()
 
     # 读取键值为 key 的数据
-    def read(self, key):
-        with self.env.begin(write=False) as txn:
+    def read(self, key, db=None):
+        if db is None:
+            db = self.second_db
+        with self.env.begin(db=db, write=False) as txn:
             value = txn.get(key.encode('utf-8'))
             if value is not None:
                 return value.decode('utf-8')
@@ -160,4 +162,8 @@ class LMDBManager(multiprocessing.Process):
                 # 如果无法打开数据库，则添加到缺失数据库列表中
                 missing_databases.append(db_name)
         return missing_databases
+    def add_data_to_db(self, db_name, key, value):
+        db = self.second_db if db_name == 'second_db' else self.hypter_db
+        with self.env.begin(db=db, write=True) as txn:
+            txn.put(key.encode('utf-8'), value.encode('utf-8'))
 

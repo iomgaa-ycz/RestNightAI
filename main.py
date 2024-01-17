@@ -11,6 +11,7 @@ from LMDB.controller.lmdb_controller import LMDBManager
 from datetime import datetime,timedelta
 from FastAPI.Model.Onbed_model import *
 from FastAPI.Utils.dataloader import *
+from FastAPI.Utils.train import *
 
 app = FastAPI()
 
@@ -119,18 +120,37 @@ def train_Onbed():
     missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
 
     # 生成训练集和验证集
-    train_db,val_db = split_list(Database_name, arg["train_val_rate"]) # 划分训练集和验证集
-    train_dataset = PressureDataset(db_manager, None, phase="train",db_name="yuchengzhang")
+    # train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
+    # val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
+    # train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+    # val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+    
 
     # 初始化模型
     model = Onbed_model(arg)
     model = model.to(arg["device"])
 
+    # 初始化优化器与学习率衰减器
+    optimizer = torch.optim.Adam(model.parameters(), lr=arg["lr"], weight_decay=arg["weight_decay"])
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=arg["step_size"], gamma=arg["gamma"])
+
+    # 训练
+    for epoch in range(arg["epochs"]):
+        train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
+        train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+        train_loss = train(model, train_loader, optimizer, arg)
+        val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
+        val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+        val_loss = val(model, val_loader, optimizer, arg)
+        
+        scheduler.step()
+        print("epoch: ", epoch, "train_loss: ", train_loss, "val_loss: ", val_loss)
+
 
     print(missing_databases)
 
 def main():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=443)
 
 if __name__ == "__main__":
     main()

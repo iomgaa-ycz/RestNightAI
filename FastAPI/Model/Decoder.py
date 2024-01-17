@@ -4,10 +4,10 @@ class BasicBlockDecoder(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, output_padding=0):
         super(BasicBlockDecoder, self).__init__()
 
-        self.conv1 = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, output_padding=output_padding, bias=False)
+        self.conv1 = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=4, stride=stride, padding=2, output_padding=output_padding, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = nn.ConvTranspose2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv2 = nn.ConvTranspose2d(out_channels, out_channels, kernel_size=4, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(out_channels)
 
     def forward(self, x):
@@ -27,8 +27,8 @@ class ResNetDecoder(nn.Module):
         self.layer2 = self._make_layer(channels[0], num_blocks[1], stride=strides[2], output_padding=1)
         self.layer1 = self._make_layer(out_channel, num_blocks[0], stride=strides[1], output_padding=1)
 
-        self.conv1 = nn.ConvTranspose2d(out_channel, out_channel, kernel_size=3, stride=strides[0], padding=1, output_padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(out_channel)
+        self.conv1 = nn.ConvTranspose2d(out_channel, 1, kernel_size=4, stride=strides[0], padding=1, output_padding=0, bias=False)
+        self.bn1 = nn.BatchNorm2d(1)
         self.relu = nn.ReLU(inplace=True)
 
     def _make_layer(self, out_channels, num_blocks, stride, output_padding):
