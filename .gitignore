@@ -2,3 +2,4 @@
 /LMDB/database
 **/*.zip
 **/wandb/
+**/artifacts/

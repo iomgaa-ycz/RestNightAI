@@ -12,6 +12,9 @@ from datetime import datetime,timedelta
 from FastAPI.Model.Onbed_model import *
 from FastAPI.Utils.dataloader import *
 from FastAPI.Utils.train import *
+import wandb
+import zipfile
+import os
 
 app = FastAPI()
 
@@ -114,8 +117,21 @@ def clean_database():
 
 @app.get("/train_Onbed")
 def train_Onbed():
+
+    run = wandb.init()
+    artifact = run.use_artifact('iomgaaycz/RestNightAI/Onbed_data:v0', type='dataset')
+    artifact_dir = artifact.download()
+
+    # 解压zip压缩包
+    extract_dir = os.path.join(artifact_dir, "database")
+    with zipfile.ZipFile(artifact_dir+"/database.zip", 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
+
+    
+
     # 读取预测参数
     arg = load_json("./FastAPI/hypter/train_Onbed.json")
+    arg["lmdb_path"] = extract_dir
     Database_name = arg["Database_name"]
     missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
 
@@ -145,7 +161,9 @@ def train_Onbed():
         
         scheduler.step()
         print("epoch: ", epoch, "train_loss: ", train_loss, "val_loss: ", val_loss)
-
+        
+        # Log metrics to Wandb
+        wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
 
     print(missing_databases)
 
