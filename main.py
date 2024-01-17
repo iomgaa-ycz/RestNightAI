@@ -158,16 +158,16 @@ def train_Onbed():
     for epoch in range(arg["epochs"]):
         train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
         train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        train_loss = train(model, train_loader, optimizer, arg)
+        train_loss_l2, train_loss_ssim = train(model, train_loader, optimizer, arg)
         val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
         val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        val_loss = val(model, val_loader, optimizer, arg)
+        val_loss_l2, val_loss_ssim = val(model, val_loader, optimizer, arg)
         
         scheduler.step()
-        print("epoch: ", epoch, "train_loss: ", train_loss, "val_loss: ", val_loss)
+        print("epoch: ", epoch, "train_loss_l2: ", train_loss_l2, "train_loss_ssim: ", train_loss_ssim, "val_loss_l2: ", val_loss_l2, "val_loss_ssim: ", val_loss_ssim)
         
         # Log metrics to Wandb
-        wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
+        wandb.log({"train_loss_l2": train_loss_l2, "train_loss_ssim": train_loss_ssim, "val_loss_l2": val_loss_l2, "val_loss_ssim": val_loss_ssim})
 
     print(missing_databases)
 
