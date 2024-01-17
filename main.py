@@ -144,6 +144,7 @@ def train_Onbed():
 
     # 初始化模型
     model = Onbed_model(arg)
+    model = initialize_layers(model)
     model = model.to(arg["device"])
 
     # 初始化优化器与学习率衰减器
