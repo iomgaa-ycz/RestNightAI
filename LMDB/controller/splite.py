@@ -31,14 +31,14 @@ def split_databases(db_path, db_names):
     
     
     # Move remaining elements to "val" database if count is not reached
-    if len(val_data) < val_count:
-        remaining_count = val_count - len(val_data)
-        for key in train_data:
-            val_data.append(key)
-            train_data.remove(key)
-            remaining_count -= 1
-            if remaining_count == 0:
-                break
+    # if len(val_data) < val_count:
+    #     remaining_count = val_count - len(val_data)
+    #     for key in train_data:
+    #         val_data.append(key)
+    #         train_data.remove(key)
+    #         remaining_count -= 1
+    #         if remaining_count == 0:
+    #             break
     
     # Write train_data to "train" database
     lmdb_manager.hypter_db = lmdb_manager.env.open_db("train".encode('utf-8'))
@@ -63,5 +63,5 @@ def split_databases(db_path, db_names):
     lmdb_manager.env.close()
 
 
-split_databases(db_path="./LMDB/database", db_names=["baishuhang"])
+split_databases(db_path="./LMDB/database", db_names=["yuchengzhang"])
 print("Done")
