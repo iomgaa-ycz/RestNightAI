@@ -1,3 +1,4 @@
 **/_*/
 /LMDB/database
 **/*.zip
+**/wandb/
