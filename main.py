@@ -16,6 +16,9 @@ import wandb
 import zipfile
 import os
 
+os.environ['WANDB_BASE_URL'] = "http://192.168.1.121:1123"
+os.environ['WANDB_API_KEY'] = "local-00f57935806148c0ce6b0c5623b2b826ad2ee681"
+
 app = FastAPI()
 
 # 加载lmdb数据库
@@ -118,8 +121,8 @@ def clean_database():
 @app.get("/train_Onbed")
 def train_Onbed():
 
-    run = wandb.init()
-    artifact = run.use_artifact('iomgaaycz/RestNightAI/Onbed_data:v0', type='dataset')
+    run = wandb.init(project='RestNightAI', entity='iomgaa')
+    artifact = run.use_artifact('iomgaa/RestNightAI/Onbed_data:v0', type='dataset')
     artifact_dir = artifact.download()
 
     # 解压zip压缩包

@@ -35,12 +35,12 @@ class PressureDataset(Dataset):
 
         if self.phase == "train":
             # 添加噪音
-            noise = np.random.normal(0, 0.001, x.shape)
-            x = x + noise
+            # noise = np.random.normal(0, 0.001, x.shape)
+            # x = x + noise
 
             # 在 w 和 h 维度上进行最多正负10的移动
-            shift_w = np.random.randint(-20, 21)  # 随机选择从-10到10的整数
-            shift_h = np.random.randint(-20, 21)  # 随机选择从-10到10的整数
+            shift_w = np.random.randint(-2, 2)  # 随机选择从-10到10的整数
+            shift_h = np.random.randint(-2, 2)  # 随机选择从-10到10的整数
             x = np.roll(x, shift_w, axis=0)  # 在 w 维度上移动
             x = np.roll(x, shift_h, axis=1)  # 在 h 维度上移动
         
