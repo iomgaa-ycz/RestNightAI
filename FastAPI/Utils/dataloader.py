@@ -25,9 +25,6 @@ class PressureDataset(Dataset):
         x = x.reshape(1,w,h)
 
         # x归一化
-        min = np.min(x)
-        max = np.max(x)
-        x = (x - min) / (max - min)
         x = x.astype(np.float32)
 
         # x中为0的元素变为-0.0001

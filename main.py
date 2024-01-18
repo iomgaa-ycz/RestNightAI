@@ -138,11 +138,6 @@ def train_Onbed():
     Database_name = arg["Database_name"]
     missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
 
-    # 生成训练集和验证集
-    # train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
-    # val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
-    # train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-    # val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
     
 
     # 初始化模型
@@ -158,16 +153,16 @@ def train_Onbed():
     for epoch in range(arg["epochs"]):
         train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
         train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        train_loss_l2, train_loss_ssim = train(model, train_loader, optimizer, arg)
+        train_loss_l2, train_loss_entropy = train(model, train_loader, optimizer, arg)
         val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
         val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        val_loss_l2, val_loss_ssim = val(model, val_loader, optimizer, arg)
+        val_loss_l2, val_loss_entropy = val(model, val_loader, optimizer, arg)
         
         scheduler.step()
-        print("epoch: ", epoch, "train_loss_l2: ", train_loss_l2, "train_loss_ssim: ", train_loss_ssim, "val_loss_l2: ", val_loss_l2, "val_loss_ssim: ", val_loss_ssim)
+        print("epoch: ", epoch, "train_loss_l2: ", train_loss_l2, "train_loss_entropy: ", train_loss_entropy, "val_loss_l2: ", val_loss_l2, "val_loss_entropy: ", val_loss_entropy)
         
         # Log metrics to Wandb
-        wandb.log({"train_loss_l2": train_loss_l2, "train_loss_ssim": train_loss_ssim, "val_loss_l2": val_loss_l2, "val_loss_ssim": val_loss_ssim})
+        wandb.log({"train_loss_l2": train_loss_l2, "train_loss_entropy": train_loss_entropy, "val_loss_l2": val_loss_l2, "val_loss_entropy": val_loss_entropy})
 
     print(missing_databases)
 

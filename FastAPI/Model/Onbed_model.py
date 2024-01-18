@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from FastAPI.Model.ResNet import *
 from FastAPI.Model.Decoder import *
+from FastAPI.Model.Mem import *
 
 class Onbed_model(nn.Module):
     def __init__(self, hypers=None):
@@ -24,7 +25,11 @@ class Onbed_model(nn.Module):
             out_channel=decoder_resnet_params['out_channel'],
             num_blocks=decoder_resnet_params['num_blocks'],
             strides=decoder_resnet_params['strides'])
+        
+        self.mem = MemModule()
+
     def forward(self, x):
         x = self.pose(x)
+        x,att = self.mem(x)
         x = self.decoder(x)
-        return x
+        return x,att
