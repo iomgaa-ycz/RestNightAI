@@ -1,6 +1,13 @@
 import lmdb
+import wandb
 import json
 from lmdb_controller import LMDBManager
+import os
+import shutil
+
+# os.environ['WANDB_MODE'] = 'offline'
+os.environ['WANDB_BASE_URL'] = "http://192.168.1.121:1123"
+os.environ['WANDB_API_KEY'] = "local-00f57935806148c0ce6b0c5623b2b826ad2ee681"
 
 def split_databases(db_path, db_names):
     
@@ -20,14 +27,17 @@ def split_databases(db_path, db_names):
             if value["action"] not in ["正卧（一级）", "正卧（二级）", "俯卧（一级）", "俯卧（二级）", "左侧卧（一级）", "左侧卧（二级）", "右侧卧（一级）", "右侧卧（二级）"]:
                 val_data.append(key)
                 data_dict[key] = name
+                # continue
             else:
-                train_data.append(key)
+                val_data.append(key)
                 data_dict[key] = name
 
-    num_keys = len(val_data) + len(train_data)
-    print("Total number of elements: ", num_keys)
+    # num_keys = len(val_data) + len(train_data)
+    # print("Total number of elements: ", num_keys)
+    print("Number of elements in val: ", len(val_data))
+    print("Number of elements in train: ", len(train_data))
     # Calculate the number of elements to be sent to "val" database
-    val_count = num_keys - int(num_keys * 0.3)
+    # val_count = num_keys - int(num_keys * 0.3)
     
     
     # Move remaining elements to "val" database if count is not reached
@@ -63,5 +73,15 @@ def split_databases(db_path, db_names):
     lmdb_manager.env.close()
 
 
-split_databases(db_path="./LMDB/database", db_names=["yuchengzhang"])
+
+
+# split_databases(db_path="./LMDB/database", db_names=["baishuhang"])
+run = wandb.init(project="RestNightAI", job_type="load-data")
+raw_data = wandb.Artifact(
+            "Onbed_data", type="dataset",
+            description="在床检测数据集，包含余承璋与白书航两个人的数据。余承璋的正例作为训练集，白书航的正例和负例作为验证集。",
+            metadata={"subject": ["yuchengzhang", "baishuhang"],
+                      "type": "Onbed"})
+raw_data.add_file("./LMDB/database.zip")
+run.log_artifact(raw_data)
 print("Done")
