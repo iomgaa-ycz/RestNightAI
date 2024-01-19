@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 def split_list(lst, rate):
@@ -30,3 +31,32 @@ def initialize_layers(model):
                 nn.init.constant_(module.bias, 0)
     return model
 
+def calculate_loss(l2_loss, loss_ssim):
+    rate = l2_loss / loss_ssim
+    if rate > 1000:
+        loss = l2_loss + loss_ssim * 1000
+    elif rate > 100:
+        loss = l2_loss + loss_ssim * 100
+    elif rate > 10:
+        loss = l2_loss + loss_ssim * 10
+    elif rate > 1:
+        loss = l2_loss + loss_ssim
+    elif rate > 0.1:
+        loss = l2_loss * 10 + loss_ssim
+    elif rate > 0.01:
+        loss = l2_loss * 100 + loss_ssim
+    else:
+        loss = l2_loss * 1000 + loss_ssim
+    return loss
+
+def calculate_acc(l2_loss, loss_ssim, pose, rate):
+    positive_samples = torch.zeros_like(l2_loss)
+    loss_samples = torch.zeros_like(l2_loss)
+    # for i in range(l2_loss.size(0)):
+    #     loss_samples[i] = calculate_loss(l2_loss[i], loss_ssim[i])
+    
+    positive_samples += torch.where((l2_loss > rate) & (pose == 1), torch.ones_like(positive_samples), torch.zeros_like(positive_samples))
+    positive_samples += torch.where((l2_loss < rate) & (pose == 0), torch.ones_like(positive_samples), torch.zeros_like(positive_samples))
+    
+    return positive_samples
+    

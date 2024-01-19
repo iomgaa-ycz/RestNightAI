@@ -122,7 +122,7 @@ def clean_database():
 def train_Onbed():
 
     run = wandb.init(project='RestNightAI', entity='iomgaa')
-    artifact = run.use_artifact('iomgaa/RestNightAI/Onbed_data:v0', type='dataset')
+    artifact = run.use_artifact('iomgaa/RestNightAI/Onbed_data:v2', type='dataset')
     artifact_dir = artifact.download()
 
     # 解压zip压缩包
@@ -138,6 +138,11 @@ def train_Onbed():
     Database_name = arg["Database_name"]
     missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
 
+    # 生成训练集和验证集
+    # train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
+    # val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
+    # train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+    # val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
     
 
     # 初始化模型
@@ -153,16 +158,16 @@ def train_Onbed():
     for epoch in range(arg["epochs"]):
         train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
         train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        train_loss_l2, train_loss_entropy = train(model, train_loader, optimizer, arg)
+        train_loss_l2, train_loss_ssim, rate = train(model, train_loader, optimizer, arg)
         val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
         val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        val_loss_l2, val_loss_entropy = val(model, val_loader, optimizer, arg)
+        val_loss_l2, val_loss_ssim, accuracy = val(model, val_loader, optimizer, arg, rate)
         
         scheduler.step()
-        print("epoch: ", epoch, "train_loss_l2: ", train_loss_l2, "train_loss_entropy: ", train_loss_entropy, "val_loss_l2: ", val_loss_l2, "val_loss_entropy: ", val_loss_entropy)
+        print("epoch: ", epoch, "train_loss_l2: ", train_loss_l2, "train_loss_ssim: ", train_loss_ssim, "val_loss_l2: ", val_loss_l2, "val_loss_ssim: ", val_loss_ssim, "accuracy: ", accuracy)
         
         # Log metrics to Wandb
-        wandb.log({"train_loss_l2": train_loss_l2, "train_loss_entropy": train_loss_entropy, "val_loss_l2": val_loss_l2, "val_loss_entropy": val_loss_entropy})
+        wandb.log({"train_loss_l2": train_loss_l2, "train_loss_ssim": train_loss_ssim, "val_loss_l2": val_loss_l2, "val_loss_ssim": val_loss_ssim, "accuracy": accuracy})
 
     print(missing_databases)
 
