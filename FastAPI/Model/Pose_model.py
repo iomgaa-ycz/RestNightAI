@@ -22,11 +22,8 @@ class Pose_model(nn.Module):
         self.head = nn.Sequential(
             nn.Linear(48*5*10, 256),
             nn.ReLU(),
-            nn.Dropout(0.5),  # Added dropout with coefficient 0.5
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Dropout(0.5),  # Added dropout with coefficient 0.5
-            nn.Linear(128, 4)
+            nn.Dropout(0.7),  # Added dropout with coefficient 0.5
+            nn.Linear(256, 4)
         )
         self.flat = nn.Flatten()
         
