@@ -189,7 +189,11 @@ def train_SleepPose():
     model = model.to(arg["device"])
 
     # 初始化优化器与学习率衰减器
-    optimizer = torch.optim.Adam(model.parameters(), lr=arg["lr"], weight_decay=arg["weight_decay"])
+    params = [
+    {'params': [p for n, p in model.named_parameters() if 'bias' not in n], 'weight_decay': arg["weight_decay"]},
+    {'params': [p for n, p in model.named_parameters() if 'bias' in n], 'weight_decay': arg["bias_decay"]}
+    ]
+    optimizer = torch.optim.Adam(params=params, lr=arg["lr"])
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=arg["step_size"], gamma=arg["gamma"])
 
     # 训练
