@@ -10,8 +10,10 @@ from FastAPI.Utils.preprocess_pressure_img import *
 from LMDB.controller.lmdb_controller import LMDBManager
 from datetime import datetime,timedelta
 from FastAPI.Model.Onbed_model import *
+from FastAPI.Model.Pose_model import *
 from FastAPI.Utils.dataloader import *
-from FastAPI.Utils.train import *
+from FastAPI.Utils.train_Onbed import *
+from FastAPI.Utils.train_Pose import *
 import wandb
 import zipfile
 import os
@@ -138,13 +140,6 @@ def train_Onbed():
     Database_name = arg["Database_name"]
     missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
 
-    # 生成训练集和验证集
-    # train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
-    # val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
-    # train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-    # val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-    
-
     # 初始化模型
     model = Onbed_model(arg)
     model = initialize_layers(model)
@@ -158,10 +153,10 @@ def train_Onbed():
     for epoch in range(arg["epochs"]):
         train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train")
         train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        train_loss_l2, train_loss_ssim, rate = train(model, train_loader, optimizer, arg)
+        train_loss_l2, train_loss_ssim, rate = train_Onbed(model, train_loader, optimizer, arg)
         val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val")
         val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
-        val_loss_l2, val_loss_ssim, accuracy = val(model, val_loader, optimizer, arg, rate)
+        val_loss_l2, val_loss_ssim, accuracy = val_Onbed(model, val_loader, optimizer, arg, rate)
         
         scheduler.step()
         print("epoch: ", epoch, "train_loss_l2: ", train_loss_l2, "train_loss_ssim: ", train_loss_ssim, "val_loss_l2: ", val_loss_l2, "val_loss_ssim: ", val_loss_ssim, "accuracy: ", accuracy)
@@ -170,6 +165,48 @@ def train_Onbed():
         wandb.log({"train_loss_l2": train_loss_l2, "train_loss_ssim": train_loss_ssim, "val_loss_l2": val_loss_l2, "val_loss_ssim": val_loss_ssim, "accuracy": accuracy})
 
     print(missing_databases)
+
+@app.get("/train_SleepPose")
+def train_SleepPose():
+    run = wandb.init(project='RestNightAI', entity='iomgaa')
+    artifact = run.use_artifact('iomgaa/RestNightAI/Sleep_Pose_data:v1', type='dataset')
+    artifact_dir = artifact.download()
+
+    # 解压zip压缩包
+    extract_dir = os.path.join(artifact_dir, "database")
+    with zipfile.ZipFile(artifact_dir+"/database.zip", 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
+    
+    # 读取预测参数
+    arg = load_json("./FastAPI/hypter/train_Pose.json")
+    arg["lmdb_path"] = extract_dir
+    Database_name = arg["Database_name"]
+    missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
+
+    # 初始化模型
+    model = Pose_model(arg)
+    model = initialize_layers(model)
+    model = model.to(arg["device"])
+
+    # 初始化优化器与学习率衰减器
+    optimizer = torch.optim.Adam(model.parameters(), lr=arg["lr"], weight_decay=arg["weight_decay"])
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=arg["step_size"], gamma=arg["gamma"])
+
+    # 训练
+    for epoch in range(arg["epochs"]):
+        train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train", mode="Pose")
+        train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+        train_loss, train_acc = train_Pose(model, train_loader, optimizer, arg)
+        val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val", mode="Pose")
+        val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+        val_loss, val_acc = val_Pose(model, val_loader, arg)
+        scheduler.step()
+        print("epoch: ", epoch, "train_loss: ", train_loss, "train_acc: ", train_acc, "val_loss: ", val_loss, "val_acc: ", val_acc)
+
+        # Log metrics to Wandb
+        wandb.log({"train_loss": train_loss, "train_acc": train_acc, "val_loss": val_loss, "val_acc": val_acc})
+
+    
 
 def main():
     uvicorn.run(app, host="0.0.0.0", port=443)

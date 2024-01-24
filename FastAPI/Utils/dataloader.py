@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 
 class PressureDataset(Dataset):
-    def __init__(self, lmdb_manager, keys=None, phase = "train",db_name="yuchengzhang"):
+    def __init__(self, lmdb_manager, keys=None, phase = "train",db_name="yuchengzhang", mode="Onbed"):
         self.lmdb_manager = lmdb_manager
         self.db_name = db_name
         self.lmdb_manager.second_db = self.lmdb_manager.env.open_db(db_name.encode('utf-8')) #设置数据库
@@ -13,6 +13,7 @@ class PressureDataset(Dataset):
         else:
             self.keys = keys
         self.phase = phase
+        self.mode = mode
 
     def __getitem__(self, index):
         key = self.keys[index]
@@ -42,10 +43,20 @@ class PressureDataset(Dataset):
             x = np.roll(x, shift_h, axis=1)  # 在 h 维度上移动
         
 
-        if value["action"] in ["正卧（一级）", "正卧（二级）", "俯卧（一级）", "俯卧（二级）", "左侧卧（一级）", "左侧卧（二级）", "右侧卧（一级）", "右侧卧（二级）"]:
-            pose = 1
-        else:
-            pose = 0
+        if self.mode == "Onbed":
+            if value["action"] in ["正卧（一级）", "正卧（二级）", "俯卧（一级）", "俯卧（二级）", "左侧卧（一级）", "左侧卧（二级）", "右侧卧（一级）", "右侧卧（二级）"]:
+                pose = 1
+            else:
+                pose = 0
+        elif self.mode == "Pose":
+            if value["action"] in ["正卧（一级）", "正卧（二级）"]:
+                pose = 0
+            elif value["action"] in ["俯卧（一级）", "俯卧（二级）"]:
+                pose = 1
+            elif value["action"] in ["左侧卧（一级）", "左侧卧（二级）"]:
+                pose = 2
+            elif value["action"] in ["右侧卧（一级）", "右侧卧（二级）"]:
+                pose = 3
 
         return x,pose
 

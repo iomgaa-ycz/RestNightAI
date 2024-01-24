@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from pytorch_msssim import SSIM
 from FastAPI.Utils.utils import *
 
-def train(model, train_loader, optimizer, arg):
+def train_Onbed(model, train_loader, optimizer, arg):
     model.train()
     train_loss_l2 = 0
     train_loss_ssim = 0
@@ -34,7 +34,7 @@ def train(model, train_loader, optimizer, arg):
             print("train_loss_l2: ", train_loss_l2 / num, "train_loss_ssim: ", train_loss_ssim / num)
     return train_loss_l2 / num, train_loss_ssim / num,  (train_loss_l2 / num) *1.5 /2
 
-def val(model, val_loader, optimizer, arg, rate):
+def val_Onbed(model, val_loader, optimizer, arg, rate):
     model.eval()
     val_loss_l2 = 0
     val_loss_ssim = 0

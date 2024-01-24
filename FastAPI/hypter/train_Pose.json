@@ -1,0 +1,53 @@
+{
+    "lmdb_path": "./LMDB/database",
+    "Database_name": ["yuchengzhang","baishuhang"],
+    "train_val_rate": 0.8,
+    "epochs": 200,
+    "num_workers": 1,
+    "batch_size": 64,
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "gamma": 0.1,
+    "step_size": 40,
+    "device": "cuda:0",
+    "encoder": {
+        "resnet1_params": {
+            "channels": [16,24,40,48],
+            "in_channel": 1,
+            "num_blocks": [1,1,1,1],
+            "strides": [2,2,2,2,2]
+        },
+        "resnet2_params": {
+            "channels": [48,48,48,48],
+            "in_channel": 48,
+            "num_blocks": [1,1,1,1],
+            "strides": [1,1,1,1,1]
+        },
+        "lstm_params": {
+            "input_size": 2400,
+            "hidden_size": 2400,
+            "num_layers": 1,
+            "batch_first": true
+        }
+    },
+    "decoder": {
+        "lstm_params": {
+            "input_size": 2400,
+            "hidden_size": 2400,
+            "num_layers": 1,
+            "batch_first": true
+        },
+        "resnet1_params": {
+            "channels": [16,24,40,48],
+            "out_channel": 48,
+            "num_blocks": [1,1,1,1],
+            "strides": [2,2,2,2,2]
+        },
+        "resnet2_params": {
+            "channels": [48,40,24,16],
+            "out_channel": 48,
+            "num_blocks": [1,1,1,1],
+            "strides": [2,2,2,2,2]
+        }
+    }
+}
