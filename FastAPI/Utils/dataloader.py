@@ -7,7 +7,7 @@ class PressureDataset(Dataset):
     def __init__(self, lmdb_manager, keys=None, phase = "train",db_name="yuchengzhang", mode="Onbed"):
         self.lmdb_manager = lmdb_manager
         self.db_name = db_name
-        self.lmdb_manager.second_db = self.lmdb_manager.env.open_db(db_name.encode('utf-8')) #设置数据库
+        self.lmdb_manager.second_db = self.lmdb_manager.env.open_db(db_name.encode('utf-8'))
         if keys is None:
             self.keys = self.lmdb_manager.get_keys()
         else:

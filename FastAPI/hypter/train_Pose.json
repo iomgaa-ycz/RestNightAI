@@ -1,6 +1,6 @@
 {
     "lmdb_path": "./LMDB/database",
-    "Database_name": ["yuchengzhang","baishuhang"],
+    "Database_name": ["yuchengzhang","baishuhang","train","val"],
     "train_val_rate": 0.8,
     "epochs": 200,
     "num_workers": 1,

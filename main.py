@@ -27,7 +27,7 @@ app = FastAPI()
 arg = load_json("./FastAPI/hypter/lmdb.json")
 arg = load_json("./FastAPI/hypter/predict.json", arg)
 db_manager = LMDBManager(arg["lmdb_path"])
-write_queue = db_manager.create()
+# write_queue = db_manager.create()
 
 # 保存标注
 collect_label = {}
@@ -169,18 +169,19 @@ def train_Onbed():
 @app.get("/train_SleepPose")
 def train_SleepPose():
     run = wandb.init(project='RestNightAI', entity='iomgaa')
-    artifact = run.use_artifact('iomgaa/RestNightAI/Sleep_Pose_data:v1', type='dataset')
+    artifact = run.use_artifact('iomgaa/RestNightAI/Sleep_Pose_data:v3', type='dataset')
     artifact_dir = artifact.download()
 
     # 解压zip压缩包
-    extract_dir = os.path.join(artifact_dir, "database")
+    extract_dir = os.path.join(artifact_dir)
     with zipfile.ZipFile(artifact_dir+"/database.zip", 'r') as zip_ref:
         zip_ref.extractall(extract_dir)
     
     # 读取预测参数
     arg = load_json("./FastAPI/hypter/train_Pose.json")
-    arg["lmdb_path"] = extract_dir
+    arg["lmdb_path"] = extract_dir+"/database"
     Database_name = arg["Database_name"]
+    db_manager = LMDBManager(arg["lmdb_path"])
     missing_databases = db_manager.check_databases(Database_name)# 检查数据库是否存在
 
     # 初始化模型

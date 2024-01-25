@@ -17,6 +17,7 @@ def split_databases(db_path, train_names=["yuchengzhang"], val_names=["baishuhan
     lmdb_manager = LMDBManager(db_path=db_path)
     lmdb_manager.second_db = lmdb_manager.env.open_db("train".encode('utf-8'))
     lmdb_manager.hypter_db = lmdb_manager.env.open_db("val".encode('utf-8'))
+    lmdb_manager.clear_databases()
     keys = lmdb_manager.get_keys()
     if len(keys) == 0:
         print("The database has already been splited!")
@@ -44,8 +45,8 @@ def split_databases(db_path, train_names=["yuchengzhang"], val_names=["baishuhan
             else:
                 val_data.append(key)
                 data_dict[key] = name
-    print("Number of elements in val: ", len(val_data))
-    print("Number of elements in train: ", len(train_data))
+    # print("Number of elements in val: ", len(val_data))
+    # print("Number of elements in train: ", len(train_data))
     
     
     # Write train_data to "train" database
@@ -70,17 +71,24 @@ def split_databases(db_path, train_names=["yuchengzhang"], val_names=["baishuhan
         value_json = lmdb_manager.read(key)
         lmdb_manager.add_data_to_db("hypter_db",key, value_json)
     
+    lmdb_manager.second_db = lmdb_manager.env.open_db("train".encode('utf-8'))
+    keys = lmdb_manager.get_keys()
+    print("Number of elements in train: ", len(keys))
+    lmdb_manager.second_db = lmdb_manager.env.open_db("val".encode('utf-8'))
+    keys = lmdb_manager.get_keys()
+    print("Number of elements in val: ", len(keys))
+    
     lmdb_manager.env.close()
 
 
 
 
-split_databases(db_path="./LMDB/database", train_names=["yuchengzhang","shunjian","fanghaolun"], val_names=["baishuhang"])
+# split_databases(db_path="./LMDB/database", train_names=["yuchengzhang","shunjian","fanghaolun"], val_names=["baishuhang"])
 run = wandb.init(project="RestNightAI", job_type="load-data")
 raw_data = wandb.Artifact(
             "Sleep_Pose_data", type="dataset",
-            description="睡姿检测数据集，包含余承璋与白书航两个人的数据。余承璋的数据作为训练集，白书航的数据作为验证集。",
-            metadata={"subject": ["yuchengzhang", "baishuhang"],
+            description="睡姿检测数据集，包含余承璋、白书航、孙建与方浩仑四个人的数据。余承璋、孙建与方浩仑的数据作为训练集，白书航的数据作为验证集。",
+            metadata={"subject": ["yuchengzhang", "baishuhang","shunjian","fanghaolun"],
                       "type": "Sleep Pose"})
 raw_data.add_file("./LMDB/database.zip")
 run.log_artifact(raw_data)
