@@ -11,9 +11,11 @@ from LMDB.controller.lmdb_controller import LMDBManager
 from datetime import datetime,timedelta
 from FastAPI.Model.Onbed_model import *
 from FastAPI.Model.Pose_model import *
+from FastAPI.Model.Action_model import *
 from FastAPI.Utils.dataloader import *
 from FastAPI.Utils.train_Onbed import *
 from FastAPI.Utils.train_Pose import *
+from FastAPI.Utils.train_Action import *
 import wandb
 import zipfile
 import os
@@ -205,6 +207,51 @@ def train_SleepPose():
         val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val", mode="Pose")
         val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
         val_loss, val_acc = val_Pose(model, val_loader, arg)
+        scheduler.step()
+        print("epoch: ", epoch, "train_loss: ", train_loss, "train_acc: ", train_acc, "val_loss: ", val_loss, "val_acc: ", val_acc)
+
+        # Log metrics to Wandb
+        wandb.log({"train_loss": train_loss, "train_acc": train_acc, "val_loss": val_loss, "val_acc": val_acc})
+
+@app.get("/train_SleepAction")
+def train_SleepAction():
+    run = wandb.init(project='RestNightAI', entity='iomgaa')
+    artifact = run.use_artifact('iomgaa/RestNightAI/Sleep_Action_data:v0', type='dataset')
+    artifact_dir = artifact.download()
+
+    # 解压zip压缩包
+    extract_dir = os.path.join(artifact_dir)
+    with zipfile.ZipFile(artifact_dir+"/database.zip", 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
+    
+    # 读取预测参数
+    arg = load_json("./FastAPI/hypter/train_Action.json")
+    arg["lmdb_path"] = extract_dir+"/database"
+    Database_name = arg["Database_name"]
+    db_manager = LMDBManager(arg["lmdb_path"])
+    missing_databases = db_manager.check_databases(Database_name)
+
+    # 初始化模型
+    model = Action_model(arg)
+    model = initialize_layers(model)
+    model = model.to(arg["device"])
+
+    # 初始化优化器与学习率衰减器
+    params = [
+    {'params': [p for n, p in model.named_parameters() if 'bias' not in n], 'weight_decay': arg["weight_decay"]},
+    {'params': [p for n, p in model.named_parameters() if 'bias' in n], 'weight_decay': arg["bias_decay"]}
+    ]
+    optimizer = torch.optim.Adam(params=params, lr=arg["lr"])
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=arg["step_size"], gamma=arg["gamma"])
+
+    # 训练
+    for epoch in range(arg["epochs"]):
+        train_dataset = PressureDataset(db_manager, None, phase="train",db_name="train", mode="Action",args=arg)
+        train_loader = DataLoader(train_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+        train_loss, train_acc = train_Action(model, train_loader, optimizer, arg)
+        val_dataset = PressureDataset(db_manager, None, phase="val",db_name="val", mode="Action",args=arg)
+        val_loader = DataLoader(val_dataset, batch_size=arg["batch_size"], shuffle=True, num_workers=arg["num_workers"])
+        val_loss, val_acc = val_Action(model, val_loader, arg)
         scheduler.step()
         print("epoch: ", epoch, "train_loss: ", train_loss, "train_acc: ", train_acc, "val_loss: ", val_loss, "val_acc: ", val_acc)
 

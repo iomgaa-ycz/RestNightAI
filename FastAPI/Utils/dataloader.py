@@ -4,26 +4,41 @@ import numpy as np
 from datetime import datetime
 
 class PressureDataset(Dataset):
-    def __init__(self, lmdb_manager, keys=None, phase = "train",db_name="yuchengzhang", mode="Onbed"):
+    def __init__(self, lmdb_manager, keys=None, phase = "train",db_name="yuchengzhang", mode="Onbed",args=None):
         self.lmdb_manager = lmdb_manager
         self.db_name = db_name
         self.lmdb_manager.second_db = self.lmdb_manager.env.open_db(db_name.encode('utf-8'))
-        if keys is None:
+        if mode == "Action":
+            if phase == "train":
+                path = args["lmdb_path"]+"/train_keys.json"
+            elif phase == "val":
+                path = args["lmdb_path"]+"/val_keys.json"
+            with open(path, "r") as f:
+                data = json.load(f)
+            self.keys = data
+        elif keys is None:
             self.keys = self.lmdb_manager.get_keys()
-        else:
-            self.keys = keys
         self.phase = phase
         self.mode = mode
 
     def __getitem__(self, index):
         key = self.keys[index]
-        value_json = self.lmdb_manager.read(key)
-        value = json.loads(value_json)
-        x = value["data"]
-        x = np.array(x)
-        n,w,h = x.shape
-        x = x[0,:,:]
-        x = x.reshape(1,w,h)
+        if self.mode == "Action":
+            x = []
+            value_json = self.lmdb_manager.read(key[0])
+            value = json.loads(value_json)
+            for AKey in key:
+                A_json = self.lmdb_manager.read(AKey)
+                A_value = json.loads(A_json)
+                x.append(A_value["data"])
+            x = np.array(x)
+            n,c,w,h = x.shape
+            x = x.reshape(n*c,w,h)
+        else:
+            x = np.array(x)
+            n,w,h = x.shape
+            x = x[0,:,:]
+            x = x.reshape(1,w,h)
 
         # x归一化
         x = x.astype(np.float32)
@@ -57,6 +72,13 @@ class PressureDataset(Dataset):
                 pose = 2
             elif value["action"] in ["右侧卧（一级）", "右侧卧（二级）"]:
                 pose = 3
+        elif self.mode == "Action":
+            if value["action"] in ["正卧（一级）", "俯卧（一级）", "左侧卧（一级）", "右侧卧（一级）"]:
+                pose = 0
+            elif value["action"] in ["正卧（二级）", "俯卧（二级）", "左侧卧（二级）", "右侧卧（二级）"]:
+                pose = 1
+            elif value["action"] in ["三级体动"]:
+                pose = 2
 
         return x,pose
 
