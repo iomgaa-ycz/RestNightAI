@@ -1,3 +1,45 @@
 {
-    "status": false
+    "status": true,
+    "threshold_UnBed": 100,
+    "threshold_Onbed": 3,
+    "encoder": {
+        "resnet1_params": {
+            "channels": [16,24,40,48],
+            "in_channel": 1,
+            "num_blocks": [1,1,1,1],
+            "strides": [2,2,2,2,2]
+        },
+        "resnet2_params": {
+            "channels": [48,48,48,48],
+            "in_channel": 48,
+            "num_blocks": [1,1,1,1],
+            "strides": [1,1,1,1,1]
+        },
+        "lstm_params": {
+            "input_size": 2400,
+            "hidden_size": 2400,
+            "num_layers": 1,
+            "batch_first": true
+        }
+    },
+    "decoder": {
+        "lstm_params": {
+            "input_size": 2400,
+            "hidden_size": 2400,
+            "num_layers": 1,
+            "batch_first": true
+        },
+        "resnet1_params": {
+            "channels": [16,24,40,48],
+            "out_channel": 48,
+            "num_blocks": [1,1,1,1],
+            "strides": [2,2,2,2,2]
+        },
+        "resnet2_params": {
+            "channels": [48,40,24,16],
+            "out_channel": 48,
+            "num_blocks": [1,1,1,1],
+            "strides": [2,2,2,2,2]
+        }
+    }
 }

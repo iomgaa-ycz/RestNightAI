@@ -29,12 +29,17 @@ app = FastAPI()
 arg = load_json("./FastAPI/hypter/lmdb.json")
 arg = load_json("./FastAPI/hypter/predict.json", arg)
 db_manager = LMDBManager(arg["lmdb_path"])
-# write_queue = db_manager.create()
+write_queue = db_manager.create()
 
 # 保存标注
 collect_label = {}
 action_list = ["正卧（一级）", "正卧（二级）", "俯卧（一级）", "俯卧（二级）", "左侧卧（一级）", "左侧卧（二级）", "右侧卧（一级）", "右侧卧（二级）","坐床头", "坐床边", "坐中间", "手掌", "站立", "三级体动"]
 index = 0
+
+model_Onbed = Onbed_model(hypers=arg).cuda()
+model_Pose = Pose_model(hypers=arg).cuda()
+model_Action = Action_model(hypers=arg).cuda()
+data_collect = np.zeros((20, 160, 320))
 
 # 缓冲池
 buffer_pool = {}
@@ -70,7 +75,8 @@ def predict(data: PAAInputData):
 
     # 如果为True则为预测，否则为采集
     if arg["status"] == True:
-        predictor(arg, pressure_datas, ID, write_queue)
+        global data_collect,model_Onbed
+        action,data_collect = predictor(arg, pressure_datas, ID, write_queue,data_collect,model_Onbed)
     else:
         global buffer_pool
         buffer_pool = collector(arg, pressure_datas, ID, write_queue, collect_label,buffer_pool)
@@ -261,7 +267,7 @@ def train_SleepAction():
     
 
 def main():
-    uvicorn.run(app, host="0.0.0.0", port=443)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":
     main()

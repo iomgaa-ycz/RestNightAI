@@ -22,7 +22,7 @@ class LMDBManager(multiprocessing.Process):
         # LMDB 数据库最大存储空间
         self.map_size = map_size 
 
-        # 最大数据库数量
+        # 最大数据库数量s
         self.max_dbs = max_dbs 
 
         # 创建进程间通信队列
@@ -32,7 +32,8 @@ class LMDBManager(multiprocessing.Process):
         self.env = lmdb.open(self.db_path, map_size=self.map_size, max_dbs=self.max_dbs) 
 
         # 创建并打开命名为 'pressure' 的数据库
-        self.second_db = self.env.open_db('yuchengzhang'.encode('utf-8')) 
+        self.second_db = self.env.open_db('liujunjie'.encode('utf-8'))
+        # 'aiyubo' ,'Zhaozhiheng','gaoyuqi','caiwentao'
 
         # 创建并打开命名为 'hypter' 的数据库
         self.hypter_db = self.env.open_db('hypter'.encode('utf-8')) 
