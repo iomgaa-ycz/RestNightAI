@@ -14,7 +14,7 @@ def split_databases(db_path, train_names=["yuchengzhang"], val_names=["baishuhan
     val_data = []
     train_data = []
     data_dict = {}
-    lmdb_manager = LMDBManager(db_path=db_path)
+    lmdb_manager = LMDBManager(db_path=db_path,max_dbs=20)
     lmdb_manager.second_db = lmdb_manager.env.open_db("train".encode('utf-8'))
     lmdb_manager.hypter_db = lmdb_manager.env.open_db("val".encode('utf-8'))
     lmdb_manager.clear_databases()
@@ -83,12 +83,14 @@ def split_databases(db_path, train_names=["yuchengzhang"], val_names=["baishuhan
 
 
 
-# split_databases(db_path="./LMDB/database", train_names=["yuchengzhang","shunjian","fanghaolun"], val_names=["baishuhang"])
+# split_databases(db_path="./LMDB/database", train_names=['aiyubo' ,'Zhaozhiheng','gaoyuqi','caiwentao','liujunjie','fanghaolun','shunjian','wangjin','yuchengzhang'], val_names=["baishuhang"])
 run = wandb.init(project="RestNightAI", job_type="load-data")
 raw_data = wandb.Artifact(
             "Sleep_Pose_data", type="dataset",
-            description="睡姿检测数据集，包含余承璋、白书航、孙建与方浩仑四个人的数据。余承璋、孙建与方浩仑的数据作为训练集，白书航的数据作为验证集。",
-            metadata={"subject": ["yuchengzhang", "baishuhang","shunjian","fanghaolun"],
+            description="睡姿检测数据集，包含十个人的数据。白书航的数据作为验证集，其他数据作为训练集。",
+            metadata={"subject": {
+                "train":['aiyubo' ,'Zhaozhiheng','gaoyuqi','caiwentao','liujunjie','fanghaolun','shunjian','wangjin','yuchengzhang'],
+                "val": ["baishuhang"]},
                       "type": "Sleep Pose"})
 raw_data.add_file("./LMDB/database.zip")
 run.log_artifact(raw_data)

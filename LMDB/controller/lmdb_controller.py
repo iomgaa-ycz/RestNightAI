@@ -32,8 +32,8 @@ class LMDBManager(multiprocessing.Process):
         self.env = lmdb.open(self.db_path, map_size=self.map_size, max_dbs=self.max_dbs) 
 
         # 创建并打开命名为 'pressure' 的数据库
-        self.second_db = self.env.open_db('liujunjie'.encode('utf-8'))
-        # 'aiyubo' ,'Zhaozhiheng','gaoyuqi','caiwentao'
+        self.second_db = self.env.open_db('wangjin'.encode('utf-8'))
+        # 'aiyubo' ,'Zhaozhiheng','gaoyuqi','caiwentao','liujunjie','baishuhang','fanghaolun','shunjian','wangjin','yuchengzhang'
 
         # 创建并打开命名为 'hypter' 的数据库
         self.hypter_db = self.env.open_db('hypter'.encode('utf-8')) 

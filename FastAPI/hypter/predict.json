@@ -1,5 +1,5 @@
 {
-    "status": true,
+    "status": false,
     "threshold_UnBed": 100,
     "threshold_Onbed": 3,
     "encoder": {
