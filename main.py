@@ -177,7 +177,7 @@ def train_Onbed():
 @app.get("/train_SleepPose")
 def train_SleepPose():
     run = wandb.init(project='RestNightAI', entity='iomgaa')
-    artifact = run.use_artifact('iomgaa/RestNightAI/Sleep_Pose_data:v3', type='dataset')
+    artifact = run.use_artifact('iomgaa/RestNightAI/Sleep_Pose_data:latest', type='dataset')
     artifact_dir = artifact.download()
 
     # 解压zip压缩包

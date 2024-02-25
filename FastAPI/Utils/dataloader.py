@@ -35,6 +35,9 @@ class PressureDataset(Dataset):
             n,c,w,h = x.shape
             x = x.reshape(n*c,w,h)
         else:
+            value_json = self.lmdb_manager.read(key)
+            value = json.loads(value_json)
+            x = value["data"]
             x = np.array(x)
             n,w,h = x.shape
             x = x[0,:,:]
