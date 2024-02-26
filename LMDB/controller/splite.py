@@ -6,8 +6,8 @@ import os
 import shutil
 
 # os.environ['WANDB_MODE'] = 'offline'
-os.environ['WANDB_BASE_URL'] = "http://192.168.1.121:1123"
-os.environ['WANDB_API_KEY'] = "local-00f57935806148c0ce6b0c5623b2b826ad2ee681"
+os.environ['WANDB_BASE_URL'] = "http://192.168.1.121:1141"
+os.environ['WANDB_API_KEY'] = "local-9a5876dc995accd0691a161ba6967e414a9c6b28"
 
 def split_databases(db_path, train_names=["yuchengzhang"], val_names=["baishuhang"]):
     

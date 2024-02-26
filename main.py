@@ -20,8 +20,8 @@ import wandb
 import zipfile
 import os
 
-os.environ['WANDB_BASE_URL'] = "http://192.168.1.121:1123"
-os.environ['WANDB_API_KEY'] = "local-00f57935806148c0ce6b0c5623b2b826ad2ee681"
+os.environ['WANDB_BASE_URL'] = "http://192.168.1.121:1141"
+os.environ['WANDB_API_KEY'] = "local-9a5876dc995accd0691a161ba6967e414a9c6b28"
 
 app = FastAPI()
 
@@ -176,6 +176,8 @@ def train_Onbed():
 
 @app.get("/train_SleepPose")
 def train_SleepPose():
+    val_acc_best = 0
+
     run = wandb.init(project='RestNightAI', entity='iomgaa')
     artifact = run.use_artifact('iomgaa/RestNightAI/Sleep_Pose_data:latest', type='dataset')
     artifact_dir = artifact.download()
@@ -196,6 +198,23 @@ def train_SleepPose():
     model = Pose_model(arg)
     model = initialize_layers(model)
     model = model.to(arg["device"])
+
+    #加载预训练权重
+    check_path = './output/best_model1.pth'
+    pretrained_weights = torch.load(check_path)
+    model_state_dict = model.state_dict()
+    for name, param in pretrained_weights.items():
+        if name in model_state_dict:
+            if param.size() == model_state_dict[name].size():
+                model_state_dict[name] = param
+            else:
+                raise ValueError(f"维度不匹配: {name}, "
+                                 f"模型中的维度: {model_state_dict[name].size()}, "
+                                 f"预训练权重的维度: {param.size()}")
+        else:
+            raise KeyError(f"{name} 不在模型的参数中")
+    model.load_state_dict(model_state_dict)
+    
 
     # 初始化优化器与学习率衰减器
     params = [
@@ -218,6 +237,20 @@ def train_SleepPose():
 
         # Log metrics to Wandb
         wandb.log({"train_loss": train_loss, "train_acc": train_acc, "val_loss": val_loss, "val_acc": val_acc})
+
+        #保存模型
+        if val_acc>val_acc_best:
+            val_acc_best=val_acc
+            torch.save(model.state_dict(), './output/best_model.pth')
+            print("the best acc is:",val_acc_best)
+    
+    raw_data = wandb.Artifact(
+            "Sleep_Pose_model", type="model",
+            description="验证精度："+str(val_acc_best),
+            metadata={"subject": {
+                "val_acc":val_acc_best}})
+    raw_data.add_file("./output/best_model.pth")
+    run.log_artifact(raw_data)
 
 @app.get("/train_SleepAction")
 def train_SleepAction():
@@ -267,7 +300,7 @@ def train_SleepAction():
     
 
 def main():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=443)
 
 if __name__ == "__main__":
     main()

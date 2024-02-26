@@ -2,14 +2,14 @@
     "lmdb_path": "./LMDB/database",
     "Database_name": ["yuchengzhang","baishuhang","train","val"],
     "train_val_rate": 0.8,
-    "epochs": 500,
+    "epochs": 50,
     "num_workers": 1,
     "batch_size": 64,
-    "lr": 0.0001,
+    "lr": 0.00001,
     "weight_decay": 0.002,
     "bias_decay": 0.0,
     "gamma": 0.1,
-    "step_size": 80,
+    "step_size": 10,
     "device": "cuda:0",
     "encoder": {
         "resnet1_params": {
